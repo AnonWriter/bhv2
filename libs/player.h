@@ -1,16 +1,17 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-/* Utilidades para manipular los datos del jugador */
+#include <allegro5/allegro.h>
+#include "ggame_utils.h"
 
-struct coords {
-	float x;
-	float y;
-};
+#define MAX_SHOOTS 200
 
-struct hitbox {
-	coords i;
-	coords f;
-};
+void draw_hitbox(Hitbox h, ALLEGRO_COLOR color);
+void move(Hitbox *h, float fmov, float sfmov, float limw, float limh, ALLEGRO_KEYBOARD_STATE * state, ALLEGRO_COLOR color);
+
+void shoot(int x, int y, int v, ALLEGRO_KEYBOARD_STATE * state);
+void refreshShoot();
+void drawShoot();
+void shootControl(int x, int y, int v, ALLEGRO_KEYBOARD_STATE * state);
 
 #endif
