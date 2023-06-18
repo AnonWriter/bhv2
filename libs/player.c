@@ -1,15 +1,22 @@
 #include "player.h"
 #include <allegro5/allegro_primitives.h>
 
-Shoot shoots[MAX_SHOOTS];
 int nShoots = 0;
 
-void draw_hitbox(Hitbox h, ALLEGRO_COLOR color){	
+void draw_hitbox(Hitbox h, ALLEGRO_COLOR color){
+	/*
 	al_draw_filled_rectangle(
 				h.a,
 				h.ab,
 				h.c,
 				h.cd,
+				color
+			);
+	*/
+	al_draw_filled_circle(
+				h.a + 5,
+				h.ab + 5,
+				(h.c - h.a) / 2,
 				color
 			);
 }
@@ -41,6 +48,13 @@ void move(Hitbox *h, float fmov, float sfmov, float limw, float limh, ALLEGRO_KE
 	shift = al_key_down(state, ALLEGRO_KEY_LSHIFT);
 
 	(!shift) ? (mov = fmov) : (mov = sfmov);
+	if(!shift){
+		mov = fmov;
+	}
+	else{
+		mov = sfmov;
+		color = al_map_rgb(255, 0, 0);
+	}
 	
 	if(left && lim_l){
 		h->a -= mov;
@@ -62,7 +76,7 @@ void move(Hitbox *h, float fmov, float sfmov, float limw, float limh, ALLEGRO_KE
 	draw_hitbox(*h, color);
 }
 
-void shoot(int x, int y, int v, ALLEGRO_KEYBOARD_STATE * state){
+void shoot(int x, int y, int v, ALLEGRO_KEYBOARD_STATE * state, Shoot * shoots){
 	bool z;
 	bool rlimit;
 
@@ -80,13 +94,18 @@ void shoot(int x, int y, int v, ALLEGRO_KEYBOARD_STATE * state){
 	}
 }
 
-void refreshShoot(){
+void refreshShoot(Shoot * shoots, Enemy * e, int * score){
 	for(int i = 0; i < nShoots; i++){
 		Shoot *s = &shoots[i];
+		s->collision = enemyCollision(e, s);
+		if(s->collision){
+			*score += SCORE_FACTOR;
+			e->life--;
+		}
 
 		s->ab -= s->vel;
 
-		if(s->ab < 0){
+		if(s->ab < 0 || s->collision){
 			shoots[i] = shoots[nShoots - 1];
 			nShoots--;
 			i--;
@@ -94,16 +113,36 @@ void refreshShoot(){
 	}
 }
 
-void drawShoot(){
+void drawShoot(Shoot * shoots){
 	for(int i = 0; i < nShoots; i++){
-		Shoot *s = &shoots[i];
+		Shoot * s = &shoots[i];
 
-		al_draw_filled_circle(s->a, s->ab, 5, al_map_rgb(255, 255, 255));
+		al_draw_filled_circle(s->a, s->ab, 3, al_map_rgb(255, 255, 255));
 	}
 }
 
-void shootControl(int x, int y, int v, ALLEGRO_KEYBOARD_STATE * state){
-	shoot(x, y, v, state);
-	refreshShoot();
-	drawShoot();
+void shootControl(int x, int y, int v, ALLEGRO_KEYBOARD_STATE * state, Shoot * shoots, Enemy * e, int * score){
+	shoot(x, y, v, state, shoots);
+	refreshShoot(shoots, e, score);
+	drawShoot(shoots);
 }
+
+bool enemyCollision(Enemy * e, Shoot * shoot){
+	bool collision;
+	bool colx;
+	bool coly;
+
+	colx = (shoot -> a) > (e -> a) && (shoot -> a) < (e -> c);
+	coly = (shoot -> ab) > (e -> ab) && (shoot -> ab) < (e -> cd);
+
+	(colx && coly) ? (collision = true) : (collision = false);
+
+	return collision;
+}
+
+bool checkQuit(ALLEGRO_KEYBOARD_STATE * state){
+	bool q = al_key_down(state, ALLEGRO_KEY_ESCAPE);
+	if(q) return true;
+	return false;
+}	
+

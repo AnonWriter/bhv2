@@ -1,6 +1,8 @@
 #ifndef GGAME_UTILS_H
 #define GGAME_UTILS_H
 
+#include <stdbool.h>
+
 typedef struct ordered_pair {
 	/* Pares ordenados de la forma (a, b) := {{a},{a, b}} */
 	float a;
@@ -20,11 +22,28 @@ typedef struct shoot {
 	float a;
 	float ab;
 	float vel;
+	bool collision;
 } Shoot;
+
+typedef struct enemy {
+	float a;
+	float ab;
+	float c;
+	float cd;
+
+	int life;
+} Enemy;
 
 Point defPoint(float , float );
 Hitbox defHitbox(float , float , float , float );
 Hitbox defHitboxS(float, float, float );
 Hitbox defHibox2P(Point , Point );
+
+typedef struct biparametrical_function {
+	float x;
+	float y;
+} Function;
+
+Enemy defEnemyS(float, float, float, float);
 
 #endif

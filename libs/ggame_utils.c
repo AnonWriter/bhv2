@@ -33,3 +33,13 @@ Hitbox defHitbox2P(Point p, Point q){
 	h.cd = q.ab;
 	return h;
 }
+
+Enemy defEnemyS(float a, float ab, float lside, float life){
+	Enemy e;
+	e.a = a;
+	e.ab = ab;
+	e.c = a + lside;
+	e.cd = ab + lside;
+	e.life = life;
+	return e;
+}
