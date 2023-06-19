@@ -18,6 +18,11 @@ typedef struct four_points {
 	float cd;
 } Hitbox;
 
+typedef struct player {
+	Hitbox h;
+	int lives;
+} Player;
+
 typedef struct shoot {
 	float a;
 	float ab;
@@ -32,6 +37,7 @@ typedef struct enemy {
 	float cd;
 
 	int life;
+	bool alive;
 } Enemy;
 
 Point defPoint(float , float );
@@ -44,6 +50,15 @@ typedef struct biparametrical_function {
 	float y;
 } Function;
 
-Enemy defEnemyS(float, float, float, float);
+typedef struct vector2 {
+	float a;
+	float ab;
+	float velx;
+	float vely;
+	bool collision;
+} DShoot;
+
+Enemy defEnemyS(float, float, float, float, bool);
+Player defPlayerS(Hitbox h, int lives);
 
 #endif

@@ -3,6 +3,19 @@
 
 int nShoots = 0;
 
+void draw_player(Hitbox h, ALLEGRO_BITMAP * sprite){
+	al_draw_scaled_bitmap(
+				sprite,
+				0, 0,
+				al_get_bitmap_width(sprite),
+				al_get_bitmap_height(sprite),
+				h.a - 12.2,
+				h.ab - 20,
+				2*17, 2*29,
+				0
+			);
+}
+
 void draw_hitbox(Hitbox h, ALLEGRO_COLOR color){
 	/*
 	al_draw_filled_rectangle(
@@ -10,18 +23,20 @@ void draw_hitbox(Hitbox h, ALLEGRO_COLOR color){
 				h.ab,
 				h.c,
 				h.cd,
-				color
+				al_map_rgb(255, 255, 255)
 			);
 	*/
 	al_draw_filled_circle(
 				h.a + 5,
 				h.ab + 5,
 				(h.c - h.a) / 2,
-				color
+				al_map_rgb(255, 255, 255)
 			);
+	al_draw_circle(h.a + 5, h.ab + 5, (h.c - h.a) / 2, color, 2);
+	
 }
 
-void move(Hitbox *h, float fmov, float sfmov, float limw, float limh, ALLEGRO_KEYBOARD_STATE * state, ALLEGRO_COLOR color){
+void move(Hitbox *h, float fmov, float sfmov, float limw, float limh, ALLEGRO_KEYBOARD_STATE * state, ALLEGRO_COLOR color, ALLEGRO_BITMAP * sprite){
 	float mov;
 
 	bool left;
@@ -73,10 +88,11 @@ void move(Hitbox *h, float fmov, float sfmov, float limw, float limh, ALLEGRO_KE
 		h->cd += mov;
 	}
 
-	draw_hitbox(*h, color);
+	draw_player(*h, sprite);
+	if(shift) draw_hitbox(*h, color);
 }
 
-void shoot(int x, int y, int v, ALLEGRO_KEYBOARD_STATE * state, Shoot * shoots){
+void shoot(float x, float y, float v, ALLEGRO_KEYBOARD_STATE * state, Shoot * shoots){
 	bool z;
 	bool rlimit;
 
@@ -113,18 +129,32 @@ void refreshShoot(Shoot * shoots, Enemy * e, int * score){
 	}
 }
 
-void drawShoot(Shoot * shoots){
+int cont2shoot = 0; 
+void drawShoot(Shoot * shoots, ALLEGRO_BITMAP * sprite){
 	for(int i = 0; i < nShoots; i++){
 		Shoot * s = &shoots[i];
+		bool past_limit;
 
-		al_draw_filled_circle(s->a, s->ab, 3, al_map_rgb(255, 255, 255));
+		//al_draw_filled_circle(s->a, s->ab, 3, al_map_rgb(255, 255, 255));
+		al_draw_scaled_bitmap(
+					sprite,
+					0, 0,
+					al_get_bitmap_width(sprite), al_get_bitmap_height(sprite),
+					s->a - 5, s->ab - cont2shoot,
+					10, 15,
+					0
+				);
+		past_limit = cont2shoot > 25;
+		if(past_limit) cont2shoot = 0;
+		
+		cont2shoot++;
 	}
 }
 
-void shootControl(int x, int y, int v, ALLEGRO_KEYBOARD_STATE * state, Shoot * shoots, Enemy * e, int * score){
+void shootControl(float x, float y, float v, ALLEGRO_KEYBOARD_STATE * state, Shoot * shoots, Enemy * e, int * score, ALLEGRO_BITMAP * sprite){
 	shoot(x, y, v, state, shoots);
 	refreshShoot(shoots, e, score);
-	drawShoot(shoots);
+	drawShoot(shoots, sprite);
 }
 
 bool enemyCollision(Enemy * e, Shoot * shoot){
@@ -134,8 +164,9 @@ bool enemyCollision(Enemy * e, Shoot * shoot){
 
 	colx = (shoot -> a) > (e -> a) && (shoot -> a) < (e -> c);
 	coly = (shoot -> ab) > (e -> ab) && (shoot -> ab) < (e -> cd);
+	collision = colx && coly;
 
-	(colx && coly) ? (collision = true) : (collision = false);
+	//(colx && coly) ? (collision = true) : (collision = false);
 
 	return collision;
 }

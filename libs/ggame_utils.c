@@ -34,12 +34,20 @@ Hitbox defHitbox2P(Point p, Point q){
 	return h;
 }
 
-Enemy defEnemyS(float a, float ab, float lside, float life){
+Enemy defEnemyS(float a, float ab, float lside, float life, bool alive){
 	Enemy e;
 	e.a = a;
 	e.ab = ab;
 	e.c = a + lside;
 	e.cd = ab + lside;
 	e.life = life;
+	e.alive = alive;
 	return e;
+}
+
+Player defPlayerS(Hitbox h, int lives){
+	Player p;
+	p.h = h;
+	p.lives = lives;
+	return p;
 }

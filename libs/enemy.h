@@ -7,12 +7,22 @@
 #define PI 3.1415
 #define MAX_TRIG PI*10000
 
-void drawEnemy(Enemy , ALLEGRO_COLOR );
+//#define MAX_ESHOOTS 200
+
+void drawEnemy(Enemy , ALLEGRO_COLOR , ALLEGRO_BITMAP *, bool show_hitbox);
 void drawLifeBar(Enemy , ALLEGRO_COLOR , float);
 void destroyEnemy(Enemy * );
-void enemyMovement(Enemy * , Function f, ALLEGRO_COLOR , bool, float);
-void enemyControl(Enemy * , Function f, ALLEGRO_COLOR , bool, float);
+void enemyMovement(Enemy * , Function f, ALLEGRO_COLOR , bool, float, ALLEGRO_BITMAP * , bool show_hitbox);
+void enemyControl(Enemy * , Function f, ALLEGRO_COLOR , bool, float, ALLEGRO_BITMAP * , bool show_hitbox);
 
-Function SinusoidalMovement();
+
+void enemyShoot(float x, float y, float velx, float vely, Function f, DShoot * eshoots, bool shooting, int MAX_ESHOOTS);
+void refreshEnemyShoot(DShoot * eshoots, Hitbox * player, int * lifes, ALLEGRO_TIMER * timer);
+bool playerCollision(Hitbox h, DShoot * shoot, ALLEGRO_TIMER * timer);
+void drawEnemyShoot(DShoot * eshoots);
+void enemyShootControl(float x, float y, float velx, float vely, Function f, DShoot * eshoots, bool shooting, int MAX_ESHOOTS, Hitbox * player, int * lifes, ALLEGRO_TIMER * timer);
+
+Function SinusoidalMovement(float a, float b, float c, float d, float e, float g, float h, float i);
+Function AbsSinusoidalMovement(float a, float b, float c, float d, float e, float g, float h, float i);
 
 #endif
