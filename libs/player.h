@@ -19,4 +19,6 @@ bool enemyCollision(Enemy * e, Shoot * shoots);
 
 bool checkQuit(ALLEGRO_KEYBOARD_STATE * state);
 
+void restartGlobalVarPlayer();
+
 #endif

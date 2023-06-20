@@ -177,3 +177,7 @@ bool checkQuit(ALLEGRO_KEYBOARD_STATE * state){
 	return false;
 }	
 
+void restartGlobalVarPlayer(){
+	nShoots = 0;
+	cont2shoot = 0;
+}

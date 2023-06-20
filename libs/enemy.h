@@ -24,5 +24,7 @@ void enemyShootControl(float x, float y, float velx, float vely, Function f, DSh
 
 Function SinusoidalMovement(float a, float b, float c, float d, float e, float g, float h, float i);
 Function AbsSinusoidalMovement(float a, float b, float c, float d, float e, float g, float h, float i);
+Function FollowPlayer(float a, float vel, Hitbox player, Enemy e, ALLEGRO_TIMER * timer);
+void restartGlobalVarShoots();
 
 #endif

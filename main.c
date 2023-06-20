@@ -11,6 +11,10 @@
 
 #define MAX_ESHOOTS 5000
 
+//void setAlltoZero(int * score, int * lifes,  bool * quit, bool * backtomain, bool * pause, Shoot * shoots, DShoot * enemy_shoots, Hitbox * player, Enemy * e);
+//void setShootArray(Shoot * arr);
+//void setDShootArray(DShoot * arr);
+
 int main(){
 	int w = 800;
 	int h = 800;
@@ -26,14 +30,17 @@ int main(){
 	int lifes = 3;
 
 	bool quit = false;
+	bool backtomain = false;
+	bool pause = false;
+	bool restart = false;
 
 	Hitbox playerhitbox = defHitboxS(400, 700, 8);
 	Player player = defPlayerS(playerhitbox, 3);
 
 	Enemy e = defEnemyS(275, 80, 50, 1671, true);
 
-	Shoot shoots[MAX_SHOOTS];
-	DShoot enemy_shoots[MAX_ESHOOTS];
+	Shoot shoots[MAX_SHOOTS] = {0.0, 0.0, 0.0, false};
+	DShoot enemy_shoots[MAX_ESHOOTS] = {0.0, 0.0, 0.0, 0.0, false};
 
 	al_init();
 	al_init_font_addon();
@@ -51,6 +58,9 @@ int main(){
 
 	ALLEGRO_TIMER * timer;
 	timer = al_create_timer(1);
+
+	ALLEGRO_TIMER * ptimer;
+	ptimer = al_create_timer(0.150);
 
 	ALLEGRO_COLOR white 	= al_map_rgb(255, 255, 255);
 	ALLEGRO_COLOR black 	= al_map_rgb(0, 0, 0);
@@ -74,87 +84,106 @@ int main(){
 	ALLEGRO_FONT * tex = al_load_ttf_font("./fonts/cmunci.ttf", 24, 0);
 	ALLEGRO_FONT * tex11 = al_load_ttf_font("./fonts/cmunci.ttf", 16, 0);
 
-	al_set_window_title(display, "Rainfall");
+	al_set_window_title(display, "Tlacobullets");
 
 	al_start_timer(timer);
-
-	mainMenu(&quit, &mstate, display, tex);
+	al_start_timer(ptimer);
 
 	while(!quit){
-		al_clear_to_color(black);
+		setAlltoZero(&score, &lifes, &quit, &backtomain, &pause, shoots, enemy_shoots, &playerhitbox, &e, MAX_SHOOTS, MAX_ESHOOTS, &restart);
+		
+		restartGlobalVarShoots();
+		restartGlobalVarPlayer();
 
-		al_draw_scaled_bitmap(
-			tlaco,
-			0, 0,
-			al_get_bitmap_width(tlaco), al_get_bitmap_height(tlaco),
-			0, 0,
-			600, 800,
-			0
-		);
+		mainMenu(&quit, &mstate, display, tex, &backtomain, &state, ptimer);
 
-		// registrar teclado
-		al_get_keyboard_state(&state);
+		while(!backtomain){
+			al_clear_to_color(black);
+			pause = al_key_down(&state, ALLEGRO_KEY_ESCAPE);
+			if(pause) Pause(&backtomain, &mstate, display, tex, &state, ptimer, &restart);
+			if(restart) setRestart(&score, &lifes, shoots, enemy_shoots, &playerhitbox, &e, MAX_SHOOTS, MAX_ESHOOTS, &restart);
 
-		// dibujisticos
-		move(
-			&playerhitbox,
-			10, 3,
-			w - 210, h,
-			&state,
-			green,
-			sprite
-		);
+	
+			al_draw_scaled_bitmap(
+				tlaco,
+				0, 0,
+				al_get_bitmap_width(tlaco), al_get_bitmap_height(tlaco),
+				0, 0,
+				600, 800,
+				0
+			);
+	
+			// registrar teclado
+			al_get_keyboard_state(&state);
+	
+			// dibujisticos
+			move(
+				&playerhitbox,
+				10, 3,
+				w - 210, h,
+				&state,
+				green,
+				sprite
+			);
+	
+			shootControl(
+				playerhitbox.a + 5,
+				playerhitbox.ab,
+				25,
+				&state,
+				shoots,
+				&e,
+				&score,
+				shoot_sprite
+			);
+	
+			enemyControl(
+				&e,
+				SinusoidalMovement(0, 0.25, 0, 0.1, 0, 0, 0, 0),
+				yellow,
+				true,
+				1671,
+				enemy_sprite,
+				false
+			);
+	
+			enemyShootControl(
+				e.a + 25,
+				e.ab + 30,
+				0,
+				0.001,
+				SinusoidalMovement(2, 1.4, 1, 1, 0, 0, 0, 0), // a*cos(c*t + e) + h
+				//FollowPlayer(0, 5, playerhitbox, e, timer),
+				enemy_shoots,
+				e.alive,
+				MAX_ESHOOTS,
+				&playerhitbox,
+				&lifes,
+				timer
+			);
 
-		shootControl(
-			playerhitbox.a + 5,
-			playerhitbox.ab,
-			25,
-			&state,
-			shoots,
-			&e,
-			&score,
-			shoot_sprite
-		);
+	
+	
+			// dibujar textp
+			sprintf(text_var, "%d", score);
+			al_draw_text(tex, white, 630, 150, 0, label);
+			al_draw_text(tex, white, 630, 174, 0, text_var);
+			al_draw_text(tex11, white, 5, 5, 0, stage);
+	
+			sprintf(lifes_text, "%d", lifes);
+			al_draw_text(tex, white, 630, 210, 0, labell);
+			al_draw_text(tex, white, 630, 234, 0, lifes_text);
+	
+			// liberar memoria
+			al_flip_display();
+		}
 
-		enemyControl(
-			&e,
-			SinusoidalMovement(0, 0.25, 0, 0.1, 0, 0, 0, 0),
-			yellow,
-			true,
-			1671,
-			enemy_sprite,
-			false
-		);
-
-		enemyShootControl(
-			e.a + 25,
-			e.ab + 30,
-			0,
-			0.001,
-			SinusoidalMovement(1, 1, 1, 1, 0, 0, 0, 0), // a*cos(c*t + e) + h
-			enemy_shoots,
-			e.alive,
-			MAX_ESHOOTS,
-			&playerhitbox,
-			&lifes,
-			timer
-		);
-
-		quit = checkQuit(&state);
-
-		// dibujar textp
-		sprintf(text_var, "%d", score);
-		al_draw_text(tex, white, 630, 150, 0, label);
-		al_draw_text(tex, white, 630, 174, 0, text_var);
-		al_draw_text(tex11, white, 5, 5, 0, stage);
-
-		sprintf(lifes_text, "%d", lifes);
-		al_draw_text(tex, white, 630, 210, 0, labell);
-		al_draw_text(tex, white, 630, 234, 0, lifes_text);
-
-		// liberar memoria
-		al_flip_display();
 	}
+
+	al_stop_timer(timer);
+	al_stop_timer(ptimer);
+
 	al_destroy_display(display);
 	return 0;
 }
+

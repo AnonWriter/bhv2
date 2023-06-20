@@ -126,7 +126,7 @@ bool playerCollision(Hitbox phx, DShoot * shoot, ALLEGRO_TIMER * timer){
 	bool colx;
 	bool coly;
 
-	timecond = al_get_timer_count(timer) > 3;
+	timecond = al_get_timer_count(timer) > 2;
 
 	colx = (shoot -> a) > (phx.a) && (shoot -> a) < (phx.c);
 	coly = (shoot -> ab) > (phx.ab) && (shoot -> ab) < (phx.cd);
@@ -181,4 +181,20 @@ Function AbsSinusoidalMovement(float a, float b, float c, float d, float e, floa
 	t++;
 
 	return f;
+}
+
+Function FollowPlayer(float a, float vel, Hitbox player, Enemy e, ALLEGRO_TIMER * timer){
+	Function f;
+	if((al_get_timer_count(timer) % 2) == 0) {
+	float diff = ((e.a + (e.c - e.a)/2) - (player.a + (player.a - player.c)/2))/60;
+	f.x = -diff;
+	}
+	f.y = vel;
+
+	return f;
+}
+
+void restartGlobalVarShoots(){
+	nEShoots = 0;
+	t = 0;
 }
