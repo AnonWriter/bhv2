@@ -3,17 +3,43 @@
 
 int nShoots = 0;
 
-void draw_player(Hitbox h, ALLEGRO_BITMAP * sprite){
-	al_draw_scaled_bitmap(
+void draw_player(Hitbox * h, ALLEGRO_BITMAP * sprite, ALLEGRO_TIMER * timer){
+	bool timecond1;
+	bool timecond2;
+	if (h->collision){
+		timecond1 = al_get_timer_count(timer) % 2 == 0;
+		timecond2 = al_get_timer_count(timer) > 10;
+		if (timecond1){
+			al_start_timer(timer);
+			al_draw_scaled_bitmap(
+					sprite,
+					0, 0,
+					al_get_bitmap_width(sprite),
+					al_get_bitmap_height(sprite),
+					h->a - 12.2,
+					h->ab - 20,
+					2*17, 2*29,
+					0
+				);
+		}
+		if(timecond2){
+			h->collision = false;
+			al_stop_timer(timer);
+			al_set_timer_count(timer, 0);
+		}
+	}
+	else{
+		al_draw_scaled_bitmap(
 				sprite,
 				0, 0,
 				al_get_bitmap_width(sprite),
 				al_get_bitmap_height(sprite),
-				h.a - 12.2,
-				h.ab - 20,
+				h->a - 12.2,
+				h->ab - 20,
 				2*17, 2*29,
 				0
 			);
+		}
 }
 
 void draw_hitbox(Hitbox h, ALLEGRO_COLOR color){
@@ -36,7 +62,7 @@ void draw_hitbox(Hitbox h, ALLEGRO_COLOR color){
 	
 }
 
-void move(Hitbox *h, float fmov, float sfmov, float limw, float limh, ALLEGRO_KEYBOARD_STATE * state, ALLEGRO_COLOR color, ALLEGRO_BITMAP * sprite){
+void move(Hitbox *h, float fmov, float sfmov, float limw, float limh, ALLEGRO_KEYBOARD_STATE * state, ALLEGRO_COLOR color, ALLEGRO_BITMAP * sprite, ALLEGRO_TIMER * timer){
 	float mov;
 
 	bool left;
@@ -88,7 +114,7 @@ void move(Hitbox *h, float fmov, float sfmov, float limw, float limh, ALLEGRO_KE
 		h->cd += mov;
 	}
 
-	draw_player(*h, sprite);
+	draw_player(h, sprite, timer);
 	if(shift) draw_hitbox(*h, color);
 }
 

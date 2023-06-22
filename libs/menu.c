@@ -38,7 +38,7 @@ void mainMenu(bool * quit, ALLEGRO_MOUSE_STATE * mstate, ALLEGRO_DISPLAY * displ
 
 	Hitbox startbox = {500, 300, 650, 350};
 	Hitbox quitbox = {520, 370, 670, 420};
-	Hitbox gamebox = {540, 440, 690, 490};
+	Hitbox gamebox = {540, 440, 750, 490};
 
 	//al_clear_to_color(al_map_rgb(0, 0, 0));
 
@@ -345,6 +345,145 @@ void Pause(bool * quit, ALLEGRO_MOUSE_STATE * mstate, ALLEGRO_DISPLAY * display,
 }
 
 
+
+void deadMenu(bool * quit, ALLEGRO_MOUSE_STATE * mstate, ALLEGRO_DISPLAY * display, ALLEGRO_FONT * tex, ALLEGRO_KEYBOARD_STATE * kstate, ALLEGRO_TIMER * timer, bool * restart){
+	bool continuar = false;
+
+	bool inquittomainboxx;
+	bool inquittomainboxy;
+	bool inrestartboxx;
+	bool inrestartboxy;
+
+	bool inrestartbox;
+	bool inquittomainbox;
+
+	bool buttondown;
+	bool spacedown;
+
+	bool downkey;
+	bool upkey;
+
+	int option = 0;
+	bool cooldown;
+
+	int mx, my;
+
+	//char * starttext = "Jugar";
+	//char * quittext = "Salir";
+
+	Hitbox quittomainbox = {520, 370, 670, 420};
+	Hitbox restartbox = {540, 440, 690, 490};
+
+	while(!continuar){
+		al_clear_to_color(al_map_rgb(0, 0, 0));
+		
+		al_get_mouse_state(mstate);
+		mx = mstate->x;
+		my = mstate->y;
+
+		al_get_keyboard_state(kstate);
+		
+		buttondown = al_mouse_button_down(mstate, 1);
+		spacedown = al_key_down(kstate, ALLEGRO_KEY_SPACE);
+		upkey = al_key_down(kstate, ALLEGRO_KEY_UP);
+		downkey = al_key_down(kstate, ALLEGRO_KEY_DOWN);
+
+		inquittomainboxx = (mx > quittomainbox.a) && (mx < quittomainbox.c);
+		inquittomainboxy = (my > quittomainbox.ab) && (my < quittomainbox.cd);
+		inquittomainbox = inquittomainboxx && inquittomainboxy;
+
+		inrestartboxx = (mx > restartbox.a) && (mx < restartbox.c);
+		inrestartboxy = (my > restartbox.ab) && (my < restartbox.cd);
+		inrestartbox = inrestartboxx && inrestartboxy;
+
+		cooldown = al_get_timer_count(timer) > 0;
+		
+		//
+		if(downkey && option < 2 && cooldown){
+			option++;
+			al_stop_timer(timer);
+			al_set_timer_count(timer, 0);
+			al_start_timer(timer);
+		}
+		if(upkey && option > 0 && cooldown){
+			option--;
+			al_stop_timer(timer);
+			al_set_timer_count(timer, 0);
+			al_start_timer(timer);
+		}
+
+		//
+
+		if(/*inquittomainbox ||*/ option == 1){
+			al_draw_filled_rectangle(
+				quittomainbox.a, quittomainbox.ab,
+				quittomainbox.c, quittomainbox.cd,
+				al_premul_rgba(255, 255, 0, 170)
+			);
+			if(/*buttondown ||*/ spacedown && cooldown){
+				(*quit) = true;
+				continuar = true;
+				al_stop_timer(timer);
+				al_set_timer_count(timer, 0);
+				al_start_timer(timer);
+			}
+		}
+		else{
+			al_draw_filled_rectangle(
+				quittomainbox.a, quittomainbox.ab,
+				quittomainbox.c, quittomainbox.cd,
+				al_premul_rgba(0, 0, 0, 170)
+			);
+		}
+
+		if(/*inrestartbox ||*/ option == 2){
+			al_draw_filled_rectangle(
+				restartbox.a, restartbox.ab,
+				restartbox.c, restartbox.cd,
+				al_premul_rgba(255, 255, 0, 170)
+			);
+			if(/*buttondown ||*/ spacedown && cooldown){
+				(*quit) = false;
+				continuar = true;
+				(*restart) = true;
+				al_stop_timer(timer);
+				al_set_timer_count(timer, 0);
+				al_start_timer(timer);
+			}
+		}
+		else{
+			al_draw_filled_rectangle(
+				restartbox.a, restartbox.ab,
+				restartbox.c, restartbox.cd,
+				al_premul_rgba(0, 0, 0, 170)
+			);
+		}
+		
+		//
+		al_draw_text(
+			tex,
+			al_map_rgb(255, 255, 255),
+			quittomainbox.a + 30, quittomainbox.ab + 10,
+			0,
+			"Menu"
+		);
+
+		al_draw_text(
+			tex,
+			al_map_rgb(255, 255, 255),
+			restartbox.a + 30, restartbox.ab + 10,
+			0,
+			"Reiniciar"
+		);
+
+		//
+		al_flip_display();
+		//al_update_display_region(quittomainbox.a, quittomainbox.ab, quittomainbox.a - quittomainbox.c, quittomainbox.ab - quittomainbox.cd);
+		//al_update_display_region(restartbox.a, restartbox.ab, restartbox.a - restartbox.c, restartbox.ab - restartbox.cd);
+
+	}
+}
+
 void setShootArray(Shoot * arr, int msx){
 	for (int i = 0; i < msx; i++){
 		(arr + i)->a = 0.0;
@@ -364,7 +503,7 @@ void setDShootArray(DShoot * arr, int msex){
 	}
 }
 
-void setAlltoZero(int * score, int * lifes,  bool * quit, bool * backtomain, bool * pause, Shoot * shoots, DShoot * enemy_shoots, Hitbox * player, Enemy * e, int msx, int msex, bool * restart){
+void setAlltoZero(int * score, int * lifes,  bool * quit, bool * backtomain, bool * pause, Shoot * shoots, DShoot * enemy_shoots, Hitbox * player, Enemy * e, int msx, int msex, bool * restart, ALLEGRO_TIMER * t1, ALLEGRO_TIMER * t2, ALLEGRO_TIMER * t3, ALLEGRO_TIMER * t4){
 		*score = 0;
 		*lifes = 3;
 		*quit = true;
@@ -374,15 +513,27 @@ void setAlltoZero(int * score, int * lifes,  bool * quit, bool * backtomain, boo
 
 		setShootArray(shoots, msx);
 		setDShootArray(enemy_shoots, msex);
+		al_stop_timer(t1);
+		al_stop_timer(t2);
+		al_stop_timer(t3);
+		al_stop_timer(t4);
+		al_set_timer_count(t1, 0);
+		al_set_timer_count(t2, 0);
+		al_set_timer_count(t3, 0);
+		al_set_timer_count(t4, 0);
 
-		*player = defHitboxS(400, 700, 8);
+		*player = defHitboxS(400, 700, 8, false);
 		*e = defEnemyS(275, 80, 50, 1671, true);
 		
 		restartGlobalVarShoots();
 		restartGlobalVarPlayer();
+		al_start_timer(t1);
+		al_start_timer(t2);
+		al_start_timer(t3);
+		//al_start_timer(t4);
 }
 
-void setRestart(int * score, int * lifes, Shoot * shoots, DShoot * enemy_shoots, Hitbox * player, Enemy * e, int msx, int msex, bool * restart){
+void setRestart(int * score, int * lifes, Shoot * shoots, DShoot * enemy_shoots, Hitbox * player, Enemy * e, int msx, int msex, bool * restart, ALLEGRO_TIMER * t1, ALLEGRO_TIMER * t2, ALLEGRO_TIMER * t3, ALLEGRO_TIMER * t4){
 		*score = 0;
 		*lifes = 3;
 		*restart = false;
@@ -390,10 +541,22 @@ void setRestart(int * score, int * lifes, Shoot * shoots, DShoot * enemy_shoots,
 		setShootArray(shoots, msx);
 		setDShootArray(enemy_shoots, msex);
 
-		*player = defHitboxS(400, 700, 8);
+		*player = defHitboxS(400, 700, 8, false);
 		*e = defEnemyS(275, 80, 50, 1671, true);
 		
 		restartGlobalVarShoots();
 		restartGlobalVarPlayer();
-}
 
+		al_stop_timer(t1);
+		al_stop_timer(t2);
+		al_stop_timer(t3);
+		al_stop_timer(t4);
+		al_set_timer_count(t1, 0);
+		al_set_timer_count(t2, 0);
+		al_set_timer_count(t3, 0);
+		al_set_timer_count(t4, 0);
+
+		al_start_timer(t1);
+		al_start_timer(t2);
+		al_start_timer(t3);
+}

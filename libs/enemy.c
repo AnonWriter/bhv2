@@ -1,6 +1,9 @@
 #include "enemy.h"
 #include <math.h>
+#include <stdlib.h>
 #include <allegro5/allegro_primitives.h>
+#include <stdio.h>
+#include <time.h>
 
 
 int t = 0;
@@ -96,25 +99,17 @@ void enemyShoot(float x, float y, float velx, float vely, Function f, DShoot * e
 	}
 }
 
-void refreshEnemyShoot(DShoot * eshoots, Hitbox * player, int * lifes, ALLEGRO_TIMER * timer){
+void refreshEnemyShoot(DShoot * eshoots, Hitbox * player, int * lifes, ALLEGRO_TIMER * timer, Function f){
 	for(int i = 0; i < nEShoots; i++){
 		//add player collision
 		DShoot *es = &eshoots[i];
-		//bool dlim;
-		//dlim = s->ab > 800;
 
 		es->a += es->velx;
 		es->ab += es->vely;
 
-		/*
-		if(dlim){
-			eshoots[i] = eshoots[0];
-			nEShoots = 0;
-			i--;
-		}
-		*/
 		es->collision = playerCollision(*player, es, timer);
 		if(es->collision){
+			player->collision = true;
 			(*lifes)--;
 		}
 	}
@@ -151,7 +146,7 @@ void drawEnemyShoot(DShoot * eshoots){
 
 void enemyShootControl(float x, float y, float velx, float vely, Function f, DShoot * eshoots, bool shooting, int MAX_ESHOOTS, Hitbox * player, int * lifes, ALLEGRO_TIMER * timer){
 	enemyShoot(x, y, velx, vely, f, eshoots, shooting, MAX_ESHOOTS);
-	refreshEnemyShoot(eshoots, player, lifes, timer);
+	refreshEnemyShoot(eshoots, player, lifes, timer, f);
 	drawEnemyShoot(eshoots);
 }
 
@@ -183,13 +178,21 @@ Function AbsSinusoidalMovement(float a, float b, float c, float d, float e, floa
 	return f;
 }
 
-Function FollowPlayer(float a, float vel, Hitbox player, Enemy e, ALLEGRO_TIMER * timer){
+Function FollowPlayer(float a, float vel, Hitbox player, DShoot * cshoot){
 	Function f;
-	if((al_get_timer_count(timer) % 2) == 0) {
-	float diff = ((e.a + (e.c - e.a)/2) - (player.a + (player.a - player.c)/2))/60;
-	f.x = -diff;
-	}
+	float diff = ((cshoot->a) - (player.a + (player.a - player.c)/2));
+	if(diff >= 0) a = a * -1;
+	f.x = a;
 	f.y = vel;
+
+	return f;
+}
+
+Function RandomMovement(ALLEGRO_TIMER * timer){
+	srand(al_get_timer_count(timer));
+	Function f;
+	f.x = 10 - (float)(rand() % 60)/(3 + rand() % 5);
+	f.y = 3 + rand() % 5;
 
 	return f;
 }

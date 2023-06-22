@@ -9,13 +9,14 @@ typedef struct ordered_pair {
 	float ab;
 } Point;
 
-typedef struct four_points {
+typedef struct two_points {
 	// p
 	float a;
 	float ab;
 	// q
 	float c;
 	float cd;
+	bool collision;
 } Hitbox;
 
 typedef struct player {
@@ -41,8 +42,8 @@ typedef struct enemy {
 } Enemy;
 
 Point defPoint(float , float );
-Hitbox defHitbox(float , float , float , float );
-Hitbox defHitboxS(float, float, float );
+Hitbox defHitbox(float , float , float , float);
+Hitbox defHitboxS(float, float, float , bool );
 Hitbox defHibox2P(Point , Point );
 
 typedef struct biparametrical_function {

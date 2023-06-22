@@ -16,12 +16,13 @@ Hitbox defHitbox(float a, float ab, float c, float cd){
 	return h;
 }
 
-Hitbox defHitboxS(float a, float ab, float lside){
+Hitbox defHitboxS(float a, float ab, float lside, bool collision){
 	Hitbox h;
 	h.a = a;
 	h.ab = ab;
 	h.c = a + lside;
 	h.cd = ab + lside;
+	h.collision = collision;
 	return h;
 }
 

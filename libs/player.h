@@ -8,8 +8,8 @@
 #define SCORE_FACTOR 7;
 
 void draw_hitbox(Hitbox h, ALLEGRO_COLOR color);
-void draw_player(Hitbox h, ALLEGRO_BITMAP * sprite);
-void move(Hitbox *h, float fmov, float sfmov, float limw, float limh, ALLEGRO_KEYBOARD_STATE * state, ALLEGRO_COLOR color, ALLEGRO_BITMAP * sprite);
+void draw_player(Hitbox * h, ALLEGRO_BITMAP * sprite, ALLEGRO_TIMER * timer);
+void move(Hitbox *h, float fmov, float sfmov, float limw, float limh, ALLEGRO_KEYBOARD_STATE * state, ALLEGRO_COLOR color, ALLEGRO_BITMAP * sprite, ALLEGRO_TIMER * timer);
 
 void shoot(float x, float y, float v, ALLEGRO_KEYBOARD_STATE * state, Shoot * shoots);
 void refreshShoot(Shoot * shoots, Enemy * e, int * score);

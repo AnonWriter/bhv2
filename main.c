@@ -11,10 +11,6 @@
 
 #define MAX_ESHOOTS 5000
 
-//void setAlltoZero(int * score, int * lifes,  bool * quit, bool * backtomain, bool * pause, Shoot * shoots, DShoot * enemy_shoots, Hitbox * player, Enemy * e);
-//void setShootArray(Shoot * arr);
-//void setDShootArray(DShoot * arr);
-
 int main(){
 	int w = 800;
 	int h = 800;
@@ -26,6 +22,7 @@ int main(){
 	char *stage = "Calles de Tlacotepec - Encuentro con el Nahual";
 	char *label = "Puntaje:";
 	char *labell = "Vidas:";
+	char *lsymb = "X";
 
 	int lifes = 3;
 
@@ -34,7 +31,7 @@ int main(){
 	bool pause = false;
 	bool restart = false;
 
-	Hitbox playerhitbox = defHitboxS(400, 700, 8);
+	Hitbox playerhitbox = defHitboxS(400, 700, 10, false);
 	Player player = defPlayerS(playerhitbox, 3);
 
 	Enemy e = defEnemyS(275, 80, 50, 1671, true);
@@ -57,11 +54,18 @@ int main(){
 	ALLEGRO_MOUSE_STATE mstate;
 
 	ALLEGRO_TIMER * timer;
-	timer = al_create_timer(1);
+	timer = al_create_timer(1.000);
 
 	ALLEGRO_TIMER * ptimer;
 	ptimer = al_create_timer(0.150);
 
+	ALLEGRO_TIMER * randtimer;
+	randtimer = al_create_timer(0.001);
+
+	ALLEGRO_TIMER * inmunitytimer;
+	inmunitytimer = al_create_timer(0.250);
+
+	ptimer = al_create_timer(0.150);
 	ALLEGRO_COLOR white 	= al_map_rgb(255, 255, 255);
 	ALLEGRO_COLOR black 	= al_map_rgb(0, 0, 0);
 	ALLEGRO_COLOR red 		= al_map_rgb(255, 0, 0);
@@ -83,14 +87,17 @@ int main(){
 
 	ALLEGRO_FONT * tex = al_load_ttf_font("./fonts/cmunci.ttf", 24, 0);
 	ALLEGRO_FONT * tex11 = al_load_ttf_font("./fonts/cmunci.ttf", 16, 0);
+	ALLEGRO_FONT * symb = al_load_ttf_font("./fonts/symbol.ttf", 16, 0);
 
 	al_set_window_title(display, "Tlacobullets");
 
 	al_start_timer(timer);
 	al_start_timer(ptimer);
+	al_start_timer(randtimer);
+	//al_start_timer(inmunitytimer);
 
 	while(!quit){
-		setAlltoZero(&score, &lifes, &quit, &backtomain, &pause, shoots, enemy_shoots, &playerhitbox, &e, MAX_SHOOTS, MAX_ESHOOTS, &restart);
+		setAlltoZero(&score, &lifes, &quit, &backtomain, &pause, shoots, enemy_shoots, &playerhitbox, &e, MAX_SHOOTS, MAX_ESHOOTS, &restart, timer, ptimer, randtimer, inmunitytimer);
 		
 		restartGlobalVarShoots();
 		restartGlobalVarPlayer();
@@ -101,7 +108,9 @@ int main(){
 			al_clear_to_color(black);
 			pause = al_key_down(&state, ALLEGRO_KEY_ESCAPE);
 			if(pause) Pause(&backtomain, &mstate, display, tex, &state, ptimer, &restart);
-			if(restart) setRestart(&score, &lifes, shoots, enemy_shoots, &playerhitbox, &e, MAX_SHOOTS, MAX_ESHOOTS, &restart);
+			if(restart) setRestart(&score, &lifes, shoots, enemy_shoots, &playerhitbox, &e, MAX_SHOOTS, MAX_ESHOOTS, &restart, timer, ptimer, randtimer, inmunitytimer);
+			if(lifes < 0) deadMenu(&backtomain, &mstate, display, tex, &state, ptimer, &restart);
+
 
 	
 			al_draw_scaled_bitmap(
@@ -123,7 +132,8 @@ int main(){
 				w - 210, h,
 				&state,
 				green,
-				sprite
+				sprite,
+				inmunitytimer
 			);
 	
 			shootControl(
@@ -151,9 +161,10 @@ int main(){
 				e.a + 25,
 				e.ab + 30,
 				0,
-				0.001,
-				SinusoidalMovement(2, 1.4, 1, 1, 0, 0, 0, 0), // a*cos(c*t + e) + h
-				//FollowPlayer(0, 5, playerhitbox, e, timer),
+				0,
+				SinusoidalMovement(1, 1.2, 1.15*4, 1.15*4, 0, 0, 0, 0), // a*cos(c*t + e) + h
+				//FollowPlayer(1, 5, playerhitbox, enemy_shoots),
+				//RandomMovement(randtimer),
 				enemy_shoots,
 				e.alive,
 				MAX_ESHOOTS,
@@ -162,26 +173,26 @@ int main(){
 				timer
 			);
 
-	
-	
 			// dibujar textp
 			sprintf(text_var, "%d", score);
 			al_draw_text(tex, white, 630, 150, 0, label);
 			al_draw_text(tex, white, 630, 174, 0, text_var);
 			al_draw_text(tex11, white, 5, 5, 0, stage);
 	
-			sprintf(lifes_text, "%d", lifes);
+			//sprintf(lifes_text, "%d", lifes);
 			al_draw_text(tex, white, 630, 210, 0, labell);
-			al_draw_text(tex, white, 630, 234, 0, lifes_text);
+			//al_draw_text(tex, white, 630, 234, 0, lifes_text);
+			for (int i = 0; i < lifes; i++){
+				al_draw_text(symb, white, 630 + 25*i, 244, 0, lsymb);
+			}
 	
 			// liberar memoria
 			al_flip_display();
 		}
-
 	}
-
 	al_stop_timer(timer);
 	al_stop_timer(ptimer);
+	al_stop_timer(randtimer);
 
 	al_destroy_display(display);
 	return 0;
