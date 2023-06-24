@@ -136,12 +136,12 @@ void shoot(float x, float y, float v, ALLEGRO_KEYBOARD_STATE * state, Shoot * sh
 	}
 }
 
-void refreshShoot(Shoot * shoots, Enemy * e, int * score){
+void refreshShoot(Shoot * shoots, Enemy * e, int * score, float sfactor){
 	for(int i = 0; i < nShoots; i++){
 		Shoot *s = &shoots[i];
 		s->collision = enemyCollision(e, s);
 		if(s->collision){
-			*score += SCORE_FACTOR;
+			*score += 7 + sfactor;
 			e->life--;
 		}
 
@@ -177,9 +177,9 @@ void drawShoot(Shoot * shoots, ALLEGRO_BITMAP * sprite){
 	}
 }
 
-void shootControl(float x, float y, float v, ALLEGRO_KEYBOARD_STATE * state, Shoot * shoots, Enemy * e, int * score, ALLEGRO_BITMAP * sprite){
+void shootControl(float x, float y, float v, ALLEGRO_KEYBOARD_STATE * state, Shoot * shoots, Enemy * e, int * score, ALLEGRO_BITMAP * sprite, float sfactor){
 	shoot(x, y, v, state, shoots);
-	refreshShoot(shoots, e, score);
+	refreshShoot(shoots, e, score, sfactor);
 	drawShoot(shoots, sprite);
 }
 

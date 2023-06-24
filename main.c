@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
@@ -9,11 +10,11 @@
 #include "libs/enemy.h"
 #include "libs/menu.h"
 
-#define MAX_ESHOOTS 5000
+#define MAX_ESHOOTS 15000
 
 int main(){
 	int w = 800;
-	int h = 800;
+	int h = 700;
 
 	int score = 0;
 	char score_text[27];
@@ -31,13 +32,18 @@ int main(){
 	bool pause = false;
 	bool restart = false;
 
-	Hitbox playerhitbox = defHitboxS(400, 700, 10, false);
+	float distancia;
+	float factd;
+
+	Hitbox playerhitbox = defHitboxS(400, 700, 20, false);
 	Player player = defPlayerS(playerhitbox, 3);
 
 	Enemy e = defEnemyS(275, 80, 50, 1671, true);
 
 	Shoot shoots[MAX_SHOOTS] = {0.0, 0.0, 0.0, false};
 	DShoot enemy_shoots[MAX_ESHOOTS] = {0.0, 0.0, 0.0, 0.0, false};
+
+	Function eshoots_func;
 
 	al_init();
 	al_init_font_addon();
@@ -52,6 +58,9 @@ int main(){
 
 	ALLEGRO_KEYBOARD_STATE state;
 	ALLEGRO_MOUSE_STATE mstate;
+
+	ALLEGRO_TIMER * mastertimer;
+	mastertimer = al_create_timer(1.000);
 
 	ALLEGRO_TIMER * timer;
 	timer = al_create_timer(1.000);
@@ -94,24 +103,42 @@ int main(){
 	al_start_timer(timer);
 	al_start_timer(ptimer);
 	al_start_timer(randtimer);
+	//al_start_timer(mastertimer);
+
+	bool mt_cooldown;
 	//al_start_timer(inmunitytimer);
 
 	while(!quit){
 		setAlltoZero(&score, &lifes, &quit, &backtomain, &pause, shoots, enemy_shoots, &playerhitbox, &e, MAX_SHOOTS, MAX_ESHOOTS, &restart, timer, ptimer, randtimer, inmunitytimer);
+		al_stop_timer(mastertimer);
+		al_set_timer_count(mastertimer, 0);
+		al_start_timer(mastertimer);
+		mt_cooldown = false;
 		
 		restartGlobalVarShoots();
 		restartGlobalVarPlayer();
 
-		mainMenu(&quit, &mstate, display, tex, &backtomain, &state, ptimer);
+		mainMenu(&quit, &mstate, display, tex, &backtomain, &state, ptimer, enemy_sprite);
 
 		while(!backtomain){
 			al_clear_to_color(black);
 			pause = al_key_down(&state, ALLEGRO_KEY_ESCAPE);
+			mt_cooldown = al_get_timer_count(mastertimer) > 2;
+
 			if(pause) Pause(&backtomain, &mstate, display, tex, &state, ptimer, &restart);
-			if(restart) setRestart(&score, &lifes, shoots, enemy_shoots, &playerhitbox, &e, MAX_SHOOTS, MAX_ESHOOTS, &restart, timer, ptimer, randtimer, inmunitytimer);
-			if(lifes < 0) deadMenu(&backtomain, &mstate, display, tex, &state, ptimer, &restart);
+			if(restart){
+				setRestart(&score, &lifes, shoots, enemy_shoots, &playerhitbox, &e, MAX_SHOOTS, MAX_ESHOOTS, &restart, timer, ptimer, randtimer, inmunitytimer);
+				al_stop_timer(mastertimer);
+				al_set_timer_count(mastertimer, 0);
+				al_start_timer(mastertimer);
+			}
 
+			
+			if(lifes < 0) deadMenu(&backtomain, &mstate, display, tex, &state, ptimer, &restart, text_var);
 
+			//calcular distancia
+			distancia 	= fabs(e.ab - playerhitbox.ab);
+			factd 		= distancia/200;
 	
 			al_draw_scaled_bitmap(
 				tlaco,
@@ -136,6 +163,7 @@ int main(){
 				inmunitytimer
 			);
 	
+			if(mt_cooldown){
 			shootControl(
 				playerhitbox.a + 5,
 				playerhitbox.ab,
@@ -144,12 +172,13 @@ int main(){
 				shoots,
 				&e,
 				&score,
-				shoot_sprite
+				shoot_sprite,
+				-factd
 			);
 	
 			enemyControl(
 				&e,
-				SinusoidalMovement(0, 0.25, 0, 0.1, 0, 0, 0, 0),
+				SinusoidalMovement(0.85, 0.25, 0.030, 0.1, 0, 0, 0, 0),
 				yellow,
 				true,
 				1671,
@@ -162,7 +191,9 @@ int main(){
 				e.ab + 30,
 				0,
 				0,
-				SinusoidalMovement(1, 1.2, 1.15*4, 1.15*4, 0, 0, 0, 0), // a*cos(c*t + e) + h
+				//eshoots_func,
+				//SinusoidalMovement(1, 1, 1, 1, 0, 0, 0, 0), // a*cos(c*t + e) + h
+				SinusoidalMovementDerivative(1.3, 1.5, 1.25, 1.15, 0, 0, 0, 0), // a*cos(c*t + e) + h
 				//FollowPlayer(1, 5, playerhitbox, enemy_shoots),
 				//RandomMovement(randtimer),
 				enemy_shoots,
@@ -172,6 +203,7 @@ int main(){
 				&lifes,
 				timer
 			);
+			}
 
 			// dibujar textp
 			sprintf(text_var, "%d", score);

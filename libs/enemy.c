@@ -163,6 +163,19 @@ Function SinusoidalMovement(float a, float b, float c, float d, float e, float g
 
 	return f;
 }
+Function SinusoidalMovementDerivative(float a, float b, float c, float d, float e, float g, float h, float i){
+	Function f;
+	float v;
+	if(t > MAX_TRIG) t = 0;
+
+	v = (float)t / (2*PI);
+	f.x = -a*sin(c*v + e)*c;
+	f.y =  b*cos(d*v + g)*d;
+
+	t++;
+
+	return f;
+}
 
 Function AbsSinusoidalMovement(float a, float b, float c, float d, float e, float g, float h, float i){
 	Function f;

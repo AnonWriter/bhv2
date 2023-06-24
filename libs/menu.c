@@ -9,7 +9,7 @@
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_primitives.h>
 
-void mainMenu(bool * quit, ALLEGRO_MOUSE_STATE * mstate, ALLEGRO_DISPLAY * display, ALLEGRO_FONT * tex, bool * play, ALLEGRO_KEYBOARD_STATE * kstate, ALLEGRO_TIMER * timer){
+void mainMenu(bool * quit, ALLEGRO_MOUSE_STATE * mstate, ALLEGRO_DISPLAY * display, ALLEGRO_FONT * tex, bool * play, ALLEGRO_KEYBOARD_STATE * kstate, ALLEGRO_TIMER * timer, ALLEGRO_BITMAP * alebrije){
 	bool next = false;
 
 	bool instartboxx;
@@ -71,7 +71,7 @@ void mainMenu(bool * quit, ALLEGRO_MOUSE_STATE * mstate, ALLEGRO_DISPLAY * displ
 		cooldown = al_get_timer_count(timer) > 0;
 		
 		//
-		if(downkey && option < 2 && cooldown){
+		if(downkey && option < 1 && cooldown){
 			option++;
 			al_stop_timer(timer);
 			al_set_timer_count(timer, 0);
@@ -117,15 +117,18 @@ void mainMenu(bool * quit, ALLEGRO_MOUSE_STATE * mstate, ALLEGRO_DISPLAY * displ
 			}
 		}
 
-		if(/*ingamebox ||*/ option == 2){
+		/*	
+		if(ingamebox || option == 2){
 			al_draw_filled_rectangle(
 				gamebox.a, gamebox.ab,
 				gamebox.c, gamebox.cd,
 				al_premul_rgba(255, 255, 0, 170)
 			);
-			if(/*buttondown ||*/ spacedown){
+			if(buttondown || spacedown){
 			}
 		}
+		*/
+		al_draw_scaled_bitmap(alebrije, 0, 0, al_get_bitmap_width(alebrije), al_get_bitmap_height(alebrije), 50, 150, 400, 400, 0);
 		
 		//
 		al_draw_text(
@@ -152,6 +155,7 @@ void mainMenu(bool * quit, ALLEGRO_MOUSE_STATE * mstate, ALLEGRO_DISPLAY * displ
 			"Salir"
 		);
 
+		/*
 		al_draw_text(
 			tex,
 			al_map_rgb(255, 255, 255),
@@ -159,6 +163,7 @@ void mainMenu(bool * quit, ALLEGRO_MOUSE_STATE * mstate, ALLEGRO_DISPLAY * displ
 			0,
 			"Cambiar Juego"
 		);
+		*/
 
 		//
 		al_flip_display();
@@ -346,7 +351,7 @@ void Pause(bool * quit, ALLEGRO_MOUSE_STATE * mstate, ALLEGRO_DISPLAY * display,
 
 
 
-void deadMenu(bool * quit, ALLEGRO_MOUSE_STATE * mstate, ALLEGRO_DISPLAY * display, ALLEGRO_FONT * tex, ALLEGRO_KEYBOARD_STATE * kstate, ALLEGRO_TIMER * timer, bool * restart){
+void deadMenu(bool * quit, ALLEGRO_MOUSE_STATE * mstate, ALLEGRO_DISPLAY * display, ALLEGRO_FONT * tex, ALLEGRO_KEYBOARD_STATE * kstate, ALLEGRO_TIMER * timer, bool * restart, char * score){
 	bool continuar = false;
 
 	bool inquittomainboxx;
@@ -474,6 +479,14 @@ void deadMenu(bool * quit, ALLEGRO_MOUSE_STATE * mstate, ALLEGRO_DISPLAY * displ
 			restartbox.a + 30, restartbox.ab + 10,
 			0,
 			"Reiniciar"
+		);
+
+		al_draw_text(
+			tex,
+			al_map_rgb(255, 255, 255),
+			400, 400,
+			0,
+			score
 		);
 
 		//
