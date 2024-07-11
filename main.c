@@ -20,7 +20,7 @@ int main(){
 	char score_text[27];
 	char lifes_text[7];
 	char *text_var = score_text;
-	char *stage = "Calles de Tlacotepec - Encuentro con el Nahual";
+	char *stage = "Calles de *********** - Encuentro con el Nahual";
 	char *label = "Puntaje:";
 	char *labell = "Vidas:";
 	char *lsymb = "X";
